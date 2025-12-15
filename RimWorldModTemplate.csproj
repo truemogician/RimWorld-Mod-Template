@@ -26,6 +26,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.44.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4633" />
 		<PackageReference Include="Lib.Harmony" Version="2.4.2" />
 		<PackageReference Include="Microsoft.Build.Framework" Version="18.0.2">
@@ -72,7 +76,7 @@
 		</Task>
 	</UsingTask>
 
-	<Target Name="PostBuildDist" AfterTargets="Build">
+	<Target Name="Distribute" AfterTargets="Merge">
 		<!-- 1. Copy Assets -->
 		<ItemGroup>
 			<ModAssets Include="$(ProjectDir)Public\**\*.*" />
@@ -96,16 +100,15 @@
 			Tokens="@(AboutToken)"
 		/>
 		<!-- 3. Copy Assembly -->
-		<ItemGroup>
-			<AssembliesToCopy Include="$(TargetDir)*.dll" />
-			<AssembliesToCopy Remove="$(TargetDir)0Harmony.dll" />
-			<AssembliesToCopy Remove="$(TargetDir)System.*.dll" />
-		</ItemGroup>
-		<Copy SourceFiles="@(AssembliesToCopy)" DestinationFolder="$(DistDir)1.6\Assemblies" />
+		<Copy
+			SourceFiles="$(TargetDir)Bundle.dll"
+			DestinationFiles="$(DistDir)1.6\Assemblies\$(AssemblyName).dll"
+		/>
 		<Message Text="Distribution build complete at: $(DistDir)" Importance="high" />
 	</Target>
 
-	<Target Name="PrepareLaunch" AfterTargets="Build">
+	<Target Name="PrepareLaunch" AfterTargets="Merge">
+		<!-- 1. Generate ModsConfig.xml -->
 		<ItemGroup>
 			<ModsConfigToken Include="PackageId" Value="$(PackageId)" />
 		</ItemGroup>
@@ -114,6 +117,7 @@
 			Destination="$(SolutionDir)SaveData\Config\ModsConfig.xml"
 			Tokens="@(ModsConfigToken)"
 		/>
+		<!-- 2. Generate Launch Script -->
 		<ItemGroup>
 			<LaunchCmd Include="start &quot;RimWorld Mod Test&quot; &quot;$(GameDir)\RimWorldWin64.exe&quot; -popupwindow &quot;-savedatafolder=$(SolutionDir)SaveData&quot;" />
 		</ItemGroup>
@@ -138,6 +142,7 @@
 			<DirsToDelete Include="$(GameDir)\Mods\$(AssemblyName)" />
 			<FilesToDelete Include="$(SolutionDir)SaveData\Config\ModsConfig.xml" />
 			<FilesToDelete Include="$(TargetDir)LaunchRimWorld.bat" />
+			<FilesToDelete Include="$(TargetDir)Bundle.dll" />
 		</ItemGroup>
 		<RemoveDir Directories="@(DirsToDelete)" />
 		<Delete Files="@(FilesToDelete)" />
