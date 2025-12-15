@@ -1,0 +1,52 @@
+{
+	"$schema": "http://json.schemastore.org/template",
+	"author": "true_mogician",
+	"classifications": [
+		"Game",
+		"Library",
+		"Windows"
+	],
+	"name": "RimWorld Mod",
+	"description": "A template for creating a RimWorld mod using C# and the Verse API.",
+	"identity": "TrueMogician.Template.RimWorldMod",
+	"shortName": "rimworld-mod",
+	"tags": {
+		"language": "C#",
+		"type": "project"
+	},
+	"sourceName": "RimWorldModTemplate",
+	"symbols": {
+		"Title": {
+			"type": "parameter",
+			"datatype": "string",
+			"defaultValue": "RimWorld Mod Template",
+			"displayName": "Mod Title",
+			"description": "The display title of your mod.",
+			"replaces": "MOD_TITLE_PLACEHOLDER"
+		},
+		"Id": {
+			"type": "parameter",
+			"datatype": "string",
+			"defaultValue": "org.truemogician.rimworldmod",
+			"displayName": "Mod Identifier",
+			"description": "A unique identifier for your mod, usually in reverse domain name notation.",
+			"replaces": "MOD_ID_PLACEHOLDER"
+		},
+		"Author": {
+			"type": "parameter",
+			"datatype": "string",
+			"defaultValue": "true_mogician",
+			"displayName": "Mod Author",
+			"description": "The author(s) of this mod. If multiple, separate names with commas.",
+			"replaces": "MOD_AUTHOR_PLACEHOLDER"
+		},
+		"GameDir": {
+			"type": "parameter",
+			"datatype": "string",
+			"defaultValue": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RimWorld",
+			"displayName": "RimWorld Game Directory",
+			"description": "Enter the root directory of your RimWorld installation. Must not have a trailing backslash.",
+			"replaces": "RIMWORLD_GAME_DIR_PLACEHOLDER"
+		}
+	}
+}

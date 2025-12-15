@@ -1,0 +1,146 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<Authors>MOD_AUTHOR_PLACEHOLDER</Authors>
+		<Description>A template mod for RimWorld</Description>
+		<PackageId>MOD_ID_PLACEHOLDER</PackageId>
+		<Version>0.0.1</Version>
+		<Title>MOD_TITLE_PLACEHOLDER</Title>
+		<DistDir>$(MSBuildProjectDirectory)\Dist\</DistDir>
+		<GameDir>RIMWORLD_GAME_DIR_PLACEHOLDER</GameDir>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectProperty Include="PackageId" />
+		<Compile Remove="Tasks\*.cs" />
+		<Compile Include="Tasks\*.cs" Condition="'$(DesignTimeBuild)' == 'true'" />
+		<None Include="Tasks\*.cs" Condition="'$(DesignTimeBuild)' != 'true'" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4633" />
+		<PackageReference Include="Lib.Harmony" Version="2.4.2" />
+		<PackageReference Include="Microsoft.Build.Framework" Version="18.0.2">
+			<PrivateAssets>all</PrivateAssets>
+			<ExcludeAssets>runtime</ExcludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.0.2">
+			<PrivateAssets>all</PrivateAssets>
+			<ExcludeAssets>runtime</ExcludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="5.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ThisAssembly.AssemblyInfo" Version="2.1.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ThisAssembly.Project" Version="2.1.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<UsingTask TaskName="BuildXml" TaskFactory="RoslynCodeTaskFactory"
+		AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup />
+		<Task>
+			<Reference Include="Microsoft.Build" />
+			<Reference Include="Microsoft.Build.Framework" />
+			<Reference Include="Microsoft.Build.Utilities.Core" />
+			<Code Type="Class" Language="cs" Source="$(ProjectDir)Tasks\BuildXml.cs" />
+		</Task>
+	</UsingTask>
+
+	<UsingTask TaskName="CreateLink" TaskFactory="RoslynCodeTaskFactory"
+		AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup />
+		<Task>
+			<Reference Include="Microsoft.Build" />
+			<Reference Include="Microsoft.Build.Framework" />
+			<Reference Include="Microsoft.Build.Utilities.Core" />
+			<Code Type="Class" Language="cs" Source="$(ProjectDir)Tasks\CreateLink.cs" />
+		</Task>
+	</UsingTask>
+
+	<Target Name="PostBuildDist" AfterTargets="Build">
+		<!-- 1. Copy Assets -->
+		<ItemGroup>
+			<ModAssets Include="$(ProjectDir)Public\**\*.*" />
+		</ItemGroup>
+		<Copy
+			SourceFiles="@(ModAssets)"
+			DestinationFolder="$(DistDir)%(RecursiveDir)"
+			SkipUnchangedFiles="true"
+		/>
+		<!-- 2. Generate About.xml -->
+		<ItemGroup>
+			<AboutToken Include="Name" Value="$(Title)" />
+			<AboutToken Include="Author" Value="$(Authors)" />
+			<AboutToken Include="PackageId" Value="$(PackageId)" />
+			<AboutToken Include="Version" Value="$(Version)" />
+			<AboutToken Include="Description" Value="$(Description)" />
+		</ItemGroup>
+		<BuildXml
+			Template="$(ProjectDir)Template\About.xml"
+			Destination="$(DistDir)About\About.xml"
+			Tokens="@(AboutToken)"
+		/>
+		<!-- 3. Copy Assembly -->
+		<ItemGroup>
+			<AssembliesToCopy Include="$(TargetDir)*.dll" />
+			<AssembliesToCopy Remove="$(TargetDir)0Harmony.dll" />
+			<AssembliesToCopy Remove="$(TargetDir)System.*.dll" />
+		</ItemGroup>
+		<Copy SourceFiles="@(AssembliesToCopy)" DestinationFolder="$(DistDir)1.6\Assemblies" />
+		<Message Text="Distribution build complete at: $(DistDir)" Importance="high" />
+	</Target>
+
+	<Target Name="PrepareLaunch" AfterTargets="Build">
+		<ItemGroup>
+			<ModsConfigToken Include="PackageId" Value="$(PackageId)" />
+		</ItemGroup>
+		<BuildXml
+			Template="$(ProjectDir)Template\ModsConfig.xml"
+			Destination="$(SolutionDir)SaveData\Config\ModsConfig.xml"
+			Tokens="@(ModsConfigToken)"
+		/>
+		<ItemGroup>
+			<LaunchCmd Include="start &quot;RimWorld Mod Test&quot; &quot;$(GameDir)\RimWorldWin64.exe&quot; -popupwindow &quot;-savedatafolder=$(SolutionDir)SaveData&quot;" />
+		</ItemGroup>
+		<WriteLinesToFile
+			File="$(TargetDir)LaunchRimWorld.bat"
+			Lines="@(LaunchCmd)"
+			Overwrite="true"
+		/>
+	</Target>
+
+	<Target Name="Deploy" AfterTargets="Distribute">
+		<CreateLink
+			Source="$(DistDir)"
+			Destination="$(GameDir)\Mods\$(AssemblyName)"
+			Condition="Exists('$(GameDir)\Mods')"
+		/>
+	</Target>
+
+	<Target Name="CustomClean" AfterTargets="Clean">
+		<ItemGroup>
+			<DirsToDelete Include="$(DistDir)" />
+			<DirsToDelete Include="$(GameDir)\Mods\$(AssemblyName)" />
+			<FilesToDelete Include="$(SolutionDir)SaveData\Config\ModsConfig.xml" />
+			<FilesToDelete Include="$(TargetDir)LaunchRimWorld.bat" />
+		</ItemGroup>
+		<RemoveDir Directories="@(DirsToDelete)" />
+		<Delete Files="@(FilesToDelete)" />
+		<Message Text="Custom files and directories cleaned" Importance="High" />
+	</Target>
+</Project>
