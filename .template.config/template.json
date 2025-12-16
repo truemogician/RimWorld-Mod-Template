@@ -15,6 +15,35 @@
 		"type": "project"
 	},
 	"sourceName": "RimWorldModTemplate",
+	"sources": [
+		{
+			"source": "./",
+			"target": "./",
+			"modifiers": [
+				{
+					"exclude": [
+						"**/[Bb]in/**",
+						"**/[Oo]bj/**",
+						".template.config/**",
+						".git/**",
+						".vs/**",
+						".vscode/**",
+						"**/*.user",
+						"**/*.slnx",
+						".gitignore"
+					],
+					"include": [
+						"Public/**",
+						"Source/**",
+						"Tasks/**",
+						"Template/**",
+						"*.csproj",
+						"*.targets"
+					]
+				}
+			]
+		}
+	],
 	"symbols": {
 		"Title": {
 			"type": "parameter",
