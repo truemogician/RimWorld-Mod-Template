@@ -33,6 +33,7 @@
 						".gitignore"
 					],
 					"include": [
+						"Properties/**",
 						"Public/**",
 						"Source/**",
 						"Tasks/**",

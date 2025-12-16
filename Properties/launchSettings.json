@@ -1,0 +1,8 @@
+{
+	"profiles": {
+		"Launch RimWorld": {
+			"commandName": "Executable",
+			"executablePath": "$(TargetDir)LaunchRimWorld.bat"
+		}
+	}
+}
