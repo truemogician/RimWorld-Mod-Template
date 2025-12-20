@@ -10,7 +10,11 @@
 		<PackageId>MOD_ID_PLACEHOLDER</PackageId>
 		<Version>0.0.1</Version>
 		<Title>MOD_TITLE_PLACEHOLDER</Title>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<DistDir>$(MSBuildProjectDirectory)\Dist\</DistDir>
+		<AssemblyDistDir>$(DistDir)1.6\Assemblies\</AssemblyDistDir>
 		<GameDir>RIMWORLD_GAME_DIR_PLACEHOLDER</GameDir>
 	</PropertyGroup>
 
@@ -102,7 +106,7 @@
 		<!-- 3. Copy Assembly -->
 		<Copy
 			SourceFiles="$(TargetDir)Bundle.dll"
-			DestinationFiles="$(DistDir)1.6\Assemblies\$(AssemblyName).dll"
+			DestinationFiles="$(AssemblyDistDir)$(AssemblyName).dll"
 		/>
 		<Message Text="Distribution build complete at: $(DistDir)" Importance="high" />
 	</Target>
@@ -110,7 +114,7 @@
 	<Target Name="PrepareLaunch" AfterTargets="Merge">
 		<!-- 1. Generate ModsConfig.xml -->
 		<ItemGroup>
-			<ModsConfigToken Include="PackageId" Value="$(PackageId)" />
+			<ModsConfigToken Include="PackageId" Value="$(PackageId.ToLower())" />
 		</ItemGroup>
 		<BuildXml
 			Template="$(ProjectDir)Template\ModsConfig.xml"
