@@ -27,6 +27,7 @@
 		<Compile Remove="Tasks\*.cs" />
 		<Compile Include="Tasks\*.cs" Condition="'$(DesignTimeBuild)' == 'true'" />
 		<None Include="Tasks\*.cs" Condition="'$(DesignTimeBuild)' != 'true'" />
+		<None Remove="Dist\**\*" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -105,7 +106,7 @@
 		/>
 		<!-- 3. Copy Assembly -->
 		<Copy
-			SourceFiles="$(TargetDir)Bundle.dll"
+			SourceFiles="$(TargetDir)$(TargetName).Bundle.dll"
 			DestinationFiles="$(AssemblyDistDir)$(AssemblyName).dll"
 		/>
 		<Message Text="Distribution build complete at: $(DistDir)" Importance="high" />
@@ -146,7 +147,7 @@
 			<DirsToDelete Include="$(GameDir)\Mods\$(AssemblyName)" />
 			<FilesToDelete Include="$(SolutionDir)SaveData\Config\ModsConfig.xml" />
 			<FilesToDelete Include="$(TargetDir)LaunchRimWorld.bat" />
-			<FilesToDelete Include="$(TargetDir)Bundle.dll" />
+			<FilesToDelete Include="$(TargetDir)$(TargetName).Bundle.dll" />
 		</ItemGroup>
 		<RemoveDir Directories="@(DirsToDelete)" />
 		<Delete Files="@(FilesToDelete)" />
